@@ -1,0 +1,208 @@
+Nama  : Muhammad Restu Al-Hidayat
+Nim : 2309116067
+
+class Node:
+    def __init__(self, tiket):
+        self.tiket = tiket
+        self.next = None
+
+class LinkedList:
+    def __init__(self):
+        self.head = None
+
+    def append(self, tiket):
+        new_node = Node(tiket)
+        if not self.head:
+            self.head = new_node
+        else:
+            last_node = self.head
+            while last_node.next:
+                last_node = last_node.next
+            last_node.next = new_node
+
+    def display(self):
+        current = self.head
+        while current:
+            print(current.tiket)
+            current = current.next
+    
+    def sort_by_id(self):
+        if not self.head or not self.head.next:
+            return
+        current = self.head
+        while current:
+            index = current.next
+            while index:
+                if current.tiket.id_tiket > index.tiket.id_tiket:
+                    current.tiket, index.tiket = index.tiket, current.tiket
+                index = index.next
+            current = current.next
+
+    def sort_by_harga(self):
+        if not self.head or not self.head.next:
+            return
+        current = self.head
+        while current:
+            index = current.next
+            while index:
+                if current.tiket.harga > index.tiket.harga:
+                    current.tiket, index.tiket = index.tiket, current.tiket
+                index = index.next
+            current = current.next
+            
+    def fibonacci_search(self, id_pesawat):
+        fib_M = 0
+        fib_M_minus_1 = 1
+        fib_M_minus_2 = 0
+    
+        while fib_M < self.length():
+            fib_M_minus_2 = fib_M_minus_1
+            fib_M_minus_1 = fib_M
+            fib_M = fib_M_minus_1 + fib_M_minus_2
+
+        offset = -1
+
+        while fib_M > 1:
+            i = min(offset + fib_M_minus_2, self.length() - 1)
+
+            current = self.head
+            for _ in range(i):
+                current = current.next
+
+            if current.tiket.id_pesawat < id_pesawat:
+                fib_M, fib_M_minus_1, fib_M_minus_2 = fib_M_minus_1, fib_M_minus_2, fib_M - fib_M_minus_1
+                offset = i
+
+            elif current.tiket.id_pesawat > id_pesawat:
+                fib_M, fib_M_minus_1, fib_M_minus_2 = fib_M_minus_1 - fib_M_minus_2, fib_M_minus_2, fib_M_minus_1 - fib_M_minus_2
+
+            else:
+                return current.tiket
+
+        current = self.head
+        if current is not None and current.tiket.id_pesawat == id_pesawat:
+            return current.tiket
+
+        return None
+
+    def length(self):
+        current = self.head
+        count = 0
+        while current:
+            count += 1
+            current = current.next
+        return count
+
+class Tiket:
+    def __init__(self, id_tiket, maskapai, asal, tujuan, tanggal, harga):
+        self.id_tiket = id_tiket
+        self.maskapai = maskapai
+        self.asal = asal
+        self.tujuan = tujuan
+        self.tanggal = tanggal
+        self.harga = harga
+
+    def __str__(self):
+        return f"""
+        ID Tiket : {self.id_tiket}
+        Maskapai : {self.maskapai}
+        Asal : {self.asal}
+        Tujuan : {self.tujuan}
+        Harga RP : {self.harga}
+        """
+
+# Database
+def database():
+    tiket_db = LinkedList()
+    tiket_db.append(Tiket(1, "Garuda Indonesia", "Jakarta", "Bali", "24-03-08", 500000))
+    tiket_db.append(Tiket(2, "Lion Air", "Surabaya", "Yogyakarta", "24-03-10", 300000))
+    tiket_db.append(Tiket(3, "Citilink", "Bandung", "Lombok", "24-03-15", 400000))
+    return tiket_db
+
+def tampil_tiket():
+    tiket_list = database()
+    tiket_list.display()
+    tiket_list.sort_by_id()
+    tiket_list.sort_by_harga()
+
+def tambah_tiket(maskapai, asal, tujuan, tanggal, harga):
+    id_tiket_baru = database().head.tiket.id_tiket + 1
+    tiket_baru = Tiket(id_tiket_baru, maskapai, asal, tujuan, tanggal, harga)
+    database().append(tiket_baru)
+
+def cari_tiket(id_tiket):
+    current = database().head
+    while current:
+        if current.tiket.id_tiket == id_tiket:
+            return current.tiket
+        current = current.next
+    raise ValueError(f"Tiket dengan ID {id_tiket} tidak ditemukan")
+
+def hapus_tiket(id_tiket):
+    prev = None
+    current = database().head
+    while current:
+        if current.tiket.id_tiket == id_tiket:
+            if prev:
+                prev.next = current.next
+            else:
+                database().head = current.next
+            return
+        prev = current
+        current = current.next
+
+def ubah_tiket(id_tiket, maskapai, asal, tujuan, tanggal, harga):
+    tiket = cari_tiket(id_tiket)
+    tiket.maskapai = maskapai
+    tiket.asal = asal
+    tiket.tujuan = tujuan
+    tiket.tanggal = tanggal
+    tiket.harga = harga
+
+while True:
+    print("-" * 20)
+    print("BELI TIKET MURAH DI GENS TIKET")
+    print("-" * 20)
+    print("1. Tampilkan Daftar Tiket")
+    print("2. Cari Tiket")
+    print("3. Tambah Tiket Baru")
+    print("4. Ubah Data Tiket")
+    print("5. Hapus Data Tiket")
+    print("0. Keluar")
+
+    pilihan = input("Pilih MENU: ")
+
+    if pilihan == "1":
+        tampil_tiket()
+    elif pilihan == "2":
+        id_tiket = int(input("Masukkan Id Tiket: "))
+        try:
+            tiket = cari_tiket(id_tiket)
+            print(tiket)
+        except ValueError as e:
+            print(e)
+    elif pilihan == "3":
+        maskapai = input("Masukkan Maskapai: ")
+        asal = input("Masukkan Kota Asal: ")
+        tujuan = input("Masukkan Kota Tujuan: ")
+        tanggal = input("Masukkan Tanggal Keberangkatan (contoh 24-03-20): ")
+        harga = int(input("Masukkan Harga: "))
+        tambah_tiket(maskapai, asal, tujuan, tanggal, harga)
+        print("Tiket Berhasil Ditambahkan.")
+    elif pilihan == "4":
+        id_tiket = int(input("Masukkan ID Tiket: "))
+        maskapai = input("Masukkan Maskapai Baru: ")
+        asal = input("Masukkan Kota Asal Baru: ")
+        tujuan = input("Masukkan Kota Tujuan Baru: ")
+        tanggal = input("Masukkan Tanggal Keberangkatan Baru (contoh 24-03-20): ")
+        harga = int(input("Masukkan Harga Baru: "))
+        ubah_tiket(id_tiket, maskapai, asal, tujuan, tanggal, harga)
+        print("Data Tiket Berhasil Diubah.")
+    elif pilihan == "5":
+        id_tiket = int(input("Masukkan ID Tiket: "))
+        hapus_tiket(id_tiket)
+        print("Data Tiket Berhasil Dihapus.")
+    elif pilihan == "0":
+        break
+    else:
+        print("Pilihan tidak valid. Silakan coba lagi.")
